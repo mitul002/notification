@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notification Test</title>
+</head>
+<body>
+    <h1>Quick Notification Test</h1>
+    <button onclick="testLocalNotification()">Test Local Notification</button>
+    <button onclick="checkServiceWorker()">Check Service Worker</button>
+    <div id="status"></div>
+    
+    <script>
+        function testLocalNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('🔔 Test Notification', {
+                    body: 'If you see this, local notifications work!',
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjJTMjIgMTcuNTIgMjIgMTJTMTcuNTIgMiAxMiAyWk0xMiAyMEM3LjU4IDIwIDQgMTYuNDIgNCAxMlM3LjU4IDQgMTIgNFMxNiA3LjU4IDE2IDEyUzE2LjQyIDIwIDEyIDIwWk0xMi41IDdIMTFWMTNMNS4yNSAxNi4xNUw2IDE3LjM4TDEwLjUgMTQuNzFaIiBmaWxsPSIjMDA3YmZmIi8+Cjwvc3ZnPgo='
+                });
+                document.getElementById('status').innerHTML += '<p>✅ Local notification sent</p>';
+            } else {
+                document.getElementById('status').innerHTML += '<p>❌ Notification permission not granted</p>';
+            }
+        }
+        
+        async function checkServiceWorker() {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+                if (registration) {
+                    document.getElementById('status').innerHTML += '<p>✅ Service Worker found</p>';
+                    
+                    const subscription = await registration.pushManager.getSubscription();
+                    if (subscription) {
+                        document.getElementById('status').innerHTML += '<p>✅ Push subscription active</p>';
+                    } else {
+                        document.getElementById('status').innerHTML += '<p>❌ No push subscription</p>';
+                    }
+                } else {
+                    document.getElementById('status').innerHTML += '<p>❌ No Service Worker registered</p>';
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML += `<p>❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.onload = () => {
+            document.getElementById('status').innerHTML += `<p>📱 Notification permission: ${Notification.permission}</p>`;
+            checkServiceWorker();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Notification App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕐 Time Notification App</h1>
+            <p>Get continuous time notifications at your custom interval</p>
+        </header>
+        
+        <div class="clock-section">
+            <div class="digital-clock" id="digitalClock">
+                Loading...
+            </div>
+            <div class="date-display" id="dateDisplay">
+                Loading...
+            </div>
+        </div>
+        
+        <div class="status-section">
+            <div class="status" id="status">
+                Click "Enable Notifications" to get started
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="button-group">
+                <button id="enableBtn" class="btn btn-primary" onclick="enableNotifications()">
+                    🔔 Enable Notifications
+                </button>
+                <button id="startBtn" class="btn btn-success" onclick="startNotifications()" disabled>
+                    ▶️ Start Notifications
+                </button>
+                <button id="stopBtn" class="btn btn-danger" onclick="stopNotifications()" disabled>
+                    ⏹️ Stop Notifications
+                </button>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <div class="setting-group">
+                <label for="customInterval">Notification Interval (seconds):</label>
+                <div class="input-group">
+                    <input type="number" id="customInterval" min="5" max="3600" value="60" placeholder="Enter seconds (5-3600)">
+                    <button class="btn btn-secondary" onclick="updateInterval()">Set Interval</button>
+                </div>
+                <small>Current interval: <span id="currentInterval">60</span> seconds</small>
+            </div>
+            
+            <div class="setting-group">
+                <label>Quick Presets:</label>
+                <div class="preset-buttons">
+                    <button class="btn btn-outline" onclick="setPreset(30)">30s</button>
+                    <button class="btn btn-outline" onclick="setPreset(60)">1m</button>
+                    <button class="btn btn-outline" onclick="setPreset(300)">5m</button>
+                    <button class="btn btn-outline" onclick="setPreset(600)">10m</button>
+                    <button class="btn btn-outline" onclick="setPreset(1800)">30m</button>
+                    <button class="btn btn-outline" onclick="setPreset(3600)">1h</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>📱 How it works:</h3>
+            <ul>
+                <li>Click "Enable Notifications" and allow permission when prompted</li>
+                <li>Set your preferred notification interval (5 seconds to 1 hour)</li>
+                <li>Click "Start Notifications" to begin receiving time updates</li>
+                <li>Notifications will continue even when you close the browser tab</li>
+                <li>Return to this page to stop notifications anytime</li>
+            </ul>
+            
+            <div class="features">
+                <h4>✨ Features:</h4>
+                <div class="feature-grid">
+                    <div class="feature-item">🕐 Live Clock Display</div>
+                    <div class="feature-item">🔔 Custom Intervals</div>
+                    <div class="feature-item">🌐 Works Offline</div>
+                    <div class="feature-item">📱 Mobile Friendly</div>
+                    <div class="feature-item">⚡ Lightweight</div>
+                    <div class="feature-item">🎯 GitHub Pages Ready</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Made with ❤️ for continuous time notifications</p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
