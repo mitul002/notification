@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Notification Demo</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #e63946;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 2rem;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(29, 53, 87, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: var(--success);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+        #startBtn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        #stopBtn {
+            background: linear-gradient(135deg, var(--danger), #c1121f);
+            color: white;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:disabled {
+            opacity: 0.7;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+        }
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        .indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .log-entry {
+            padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Push Notification Demo</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Notifications</button>
+            <button id="stopBtn" disabled>Stop Notifications</button>
+        </div>
+        
+        <div class="status">
+            <div class="indicator" id="statusIndicator"></div>
+            <span id="statusText">Notifications inactive</span>
+        </div>
+        
+        <div class="log" id="notificationLog">
+            <div class="log-entry">Notification log will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - REPLACE WITH YOUR ACTUAL VALUES
+        const BACKEND_URL = "https://your-vercel-app.vercel.app";
+        const VAPID_PUBLIC_KEY = "BEBvo8LKqP4dgxiND82gB1SH_OwMKoWJapfLrmwRdnhOVhvxgVsAdeDglZMnYPop4wLM2rgwC5Ja1xQ6XCwyAi0";
+        
+        // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const notificationLog = document.getElementById('notificationLog');
+        
+        // State
+        let pushSubscription = null;
+        let isActive = false;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+        
+        async function init() {
+            addLog('Initializing application...');
+            
+            // Check browser support
+            if (!('serviceWorker' in navigator)) {
+                addLog('Error: Service Workers not supported');
+                return;
+            }
+            
+            if (!('PushManager' in window)) {
+                addLog('Error: Push API not supported');
+                return;
+            }
+            
+            try {
+                // Register service worker
+                const registration = await navigator.serviceWorker.register('sw.js');
+                addLog('Service Worker registered');
+                
+                // Check existing subscription
+                pushSubscription = await registration.pushManager.getSubscription();
+                if (pushSubscription) {
+                    isActive = true;
+                    updateUI();
+                    addLog('Found existing subscription');
+                }
+            } catch (error) {
+                addLog(`Error: ${error.message}`);
+                console.error('Initialization failed:', error);
+            }
+        }
+        
+        // Start notifications
+        async function startNotifications() {
+            try {
+                addLog('Requesting notification permission...');
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== 'granted') {
+                    throw new Error('Permission denied');
+                }
+                
+                addLog('Permission granted');
+                
+                // Get service worker registration
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Subscribe to push notifications
+                pushSubscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+                
+                addLog('Push subscription created');
+                
+                // Send subscription to backend
+                const response = await fetch(`${BACKEND_URL}/api/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        subscription: pushSubscription,
+                        interval: 10000 // 10 seconds
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to start notifications');
+                }
+                
+                isActive = true;
+                updateUI();
+                addLog('Notifications started!');
+            } catch (error) {
+                addLog(`Error: ${error.message}`);
+                console.error('Start failed:', error);
+            }
+        }
+        
+        // Stop notifications
+        async function stopNotifications() {
+            try {
+                if (!pushSubscription) return;
+                
+                addLog('Stopping notifications...');
+                
+                // Notify backend
+                await fetch(`${BACKEND_URL}/api/stop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription: pushSubscription })
+                });
+                
+                // Unsubscribe
+                await pushSubscription.unsubscribe();
+                pushSubscription = null;
+                isActive = false;
+                
+                updateUI();
+                addLog('Notifications stopped');
+            } catch (error) {
+                addLog(`Error: ${error.message}`);
+                console.error('Stop failed:', error);
+            }
+        }
+        
+        // Helper functions
+        function updateUI() {
+            statusIndicator.classList.toggle('active', isActive);
+            statusText.textContent = isActive 
+                ? 'Notifications active' 
+                : 'Notifications inactive';
+            startBtn.disabled = isActive;
+            stopBtn.disabled = !isActive;
+        }
+        
+        function addLog(message) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            // Clear placeholder if exists
+            if (notificationLog.firstChild.textContent.includes('will appear here')) {
+                notificationLog.removeChild(notificationLog.firstChild);
+            }
+            
+            notificationLog.prepend(entry);
+        }
+        
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+            
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startNotifications);
+        stopBtn.addEventListener('click', stopNotifications);
+    </script>
+</body>
+</html>
