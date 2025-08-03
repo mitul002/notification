@@ -19,7 +19,7 @@ class TimeNotificationApp {
     getApiBaseUrl() {
         // For GitHub Pages deployment, use your Vercel backend
         if (location.hostname.includes('github.io') || location.hostname.includes('vercel.app')) {
-            return 'https://notification-mfqbpev4t-mituls-projects-2010a247.vercel.app/api';
+            return 'https://notification-kum4pmihy-mituls-projects-2010a247.vercel.app/api';
         }
         // For local development
         return 'http://localhost:3001/api';
