@@ -19,10 +19,14 @@ class TimeNotificationApp {
     getApiBaseUrl() {
         // For GitHub Pages deployment, use your Vercel backend
         if (location.hostname.includes('github.io') || location.hostname.includes('vercel.app')) {
-            return 'https://notification-inky-eight.vercel.app/api';
+            const url = 'https://notification-inky-eight.vercel.app/api';
+            console.log('🔗 Using API URL:', url);
+            return url;
         }
         // For local development
-        return 'http://localhost:3001/api';
+        const url = 'http://localhost:3001/api';
+        console.log('🔗 Using API URL:', url);
+        return url;
     }
     
     init() {
