@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 // Store active subscriptions (in production, use a database)
 const activeSubscriptions = new Map();
 
-async function startNotifications(req, res) {
+const startNotifications = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -28,31 +28,23 @@ async function startNotifications(req, res) {
       return res.status(400).json({ error: 'Push subscription required' });
     }
 
-    // Validate interval (between 5 seconds and 1 hour)
+    // Validate interval (5 seconds to 1 hour)
     const notificationInterval = Math.max(5, Math.min(3600, parseInt(interval)));
-    
     const subId = uuidv4();
-    console.log(`🚀 Starting notifications for ${subId} every ${notificationInterval} seconds`);
-    
+
+    console.log(`Starting notifications for ${subId} every ${notificationInterval} seconds`);
+
     // Function to send time notification
     const sendTimeNotification = async () => {
       try {
         const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', {
-          hour12: true,
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-        
         const payload = JSON.stringify({
-          title: '🕐 Time Notification',
-          body: `Current time: ${timeString}`,
+          title: '🕐 Current Time',
+          body: `${now.toLocaleTimeString()}\n${now.toLocaleDateString()}`,
           icon: '/icon-192x192.png',
           badge: '/badge-72x72.png',
           tag: 'time-notification',
           timestamp: now.getTime(),
-          requireInteraction: false,
           actions: [
             {
               action: 'stop',
@@ -115,7 +107,7 @@ async function startNotifications(req, res) {
       message: error.message 
     });
   }
-}
+};
 
 module.exports = startNotifications;
 
