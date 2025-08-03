@@ -1,28 +1,40 @@
 # 🕐 Time Notification App
 
-A beautiful, lightweight web application that provides continuous time notifications at custom intervals. Perfect for GitHub Pages hosting!
+A professional web application with **backend push notifications** that sends continuous time notifications at custom intervals. Features a beautiful live clock and works even when the browser tab is closed!
 
 ## ✨ Features
 
 - **🕐 Live Digital Clock** - Real-time clock display with date
-- **🔔 Custom Notifications** - Set any interval from 5 seconds to 1 hour
+- **🔔 Push Notifications** - True background notifications powered by professional backend API
 - **📱 Mobile Friendly** - Responsive design that works on all devices
-- **🌐 Works Offline** - Service Worker enables background notifications
-- **⚡ Lightweight** - Pure vanilla JavaScript, no dependencies
-- **🎯 GitHub Pages Ready** - Deploy instantly to GitHub Pages
+- **🌐 Works When Tab Closed** - Push notifications continue even when browser tab is closed
+- **⚡ Professional Backend** - Node.js/Express API with VAPID authentication
+- **🎯 Production Ready** - GitHub Pages frontend + Vercel serverless backend
+
+## 🚀 Live Demo
+
+**🌐 Try it now:** [https://mitul002.github.io/notification/](https://mitul002.github.io/notification/)
+
+**🔗 Backend API:** [https://notification-mfqbpev4t-mituls-projects-2010a247.vercel.app/](https://notification-mfqbpev4t-mituls-projects-2010a247.vercel.app/)
 
 ## 🚀 Quick Start
 
-### Option 1: GitHub Pages (Recommended)
+### Option 1: Use Live Demo (Recommended)
+1. Visit [https://mitul002.github.io/notification/](https://mitul002.github.io/notification/)
+2. Click "Enable Notifications" and allow browser permission
+3. Set your desired interval and start notifications
+4. Close the tab and enjoy continuous time notifications!
+
+### Option 2: Fork and Deploy
 1. Fork this repository
 2. Go to repository Settings > Pages
 3. Select "Deploy from a branch" and choose `main` branch
 4. Visit your GitHub Pages URL: `https://yourusername.github.io/notification`
 
-### Option 2: Local Development
+### Option 3: Local Development
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/notification.git
+git clone https://github.com/mitul002/notification.git
 cd notification
 
 # Start a local server
@@ -39,19 +51,27 @@ open http://localhost:8000
 1. **Enable Notifications** - Click the button and allow browser permission
 2. **Set Your Interval** - Choose from presets (30s, 1m, 5m, etc.) or set custom seconds
 3. **Start Notifications** - Begin receiving time notifications
-4. **Background Operation** - Notifications continue even when tab is closed
-5. **Stop Anytime** - Return to the page or use notification actions to stop
+4. **Close Browser Tab** - Notifications continue running in background!
+5. **Stop Anytime** - Return to the page to stop notifications
 
-## 🛠️ Technical Details
+## 🛠️ Technical Architecture
 
-### Files Structure
+### System Components
 ```
-├── index.html          # Main HTML page
-├── style.css          # Beautiful CSS styling
-├── app.js             # Core JavaScript functionality
-├── sw.js              # Service Worker for background notifications
-└── README.md          # This file
+Frontend (GitHub Pages)     Backend (Vercel)
+├── index.html          ←→  ├── /api/start    - Start notifications
+├── style.css           ←→  ├── /api/stop     - Stop notifications  
+├── app.js              ←→  ├── /api/status   - Get server status
+├── sw.js               ←→  ├── /api/health   - Health check
+└── README.md           ←→  └── package.json  - Dependencies
 ```
+
+### Push Notification Flow
+1. **Frontend** registers Service Worker and requests notification permission
+2. **Frontend** sends push subscription to **Backend API**
+3. **Backend** stores subscription and starts sending notifications
+4. **Browser** receives push messages even when tab is closed
+5. **Service Worker** displays notifications to user
 
 ### Browser Compatibility
 - ✅ Chrome 50+
