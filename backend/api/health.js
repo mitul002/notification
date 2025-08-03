@@ -1,21 +1,18 @@
-const express = require('express');
-const app = express();
-
-// CORS middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+// Health check endpoint for Vercel serverless function
+module.exports = (req, res) => {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
   if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
+    return res.status(200).end();
   }
-});
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
   try {
     res.status(200).json({
       status: 'OK',
@@ -33,6 +30,4 @@ app.get('/api/health', (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
-});
-
-module.exports = app;
+};
